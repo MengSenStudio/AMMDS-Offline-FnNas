@@ -62,13 +62,32 @@ set_env() {
     fi
 }
 
+# 清空已有配置文件
+if [ -f "${ENV_CONFIG}" ]; then
+    log_message "检测到已有配置文件，已清空"
+    > "${ENV_CONFIG}"
+fi
+
+# 仅当值非空时才写入环境变量
+set_env_if_not_empty() {
+    local key="$1"
+    local value="$2"
+    local file="$3"
+
+    if [ -n "${value}" ]; then
+        set_env "${key}" "${value}" "${file}"
+    else
+        log_message "跳过空变量 ${key}"
+    fi
+}
+
 # 写入环境变量
 log_message "写入环境变量到 ${ENV_CONFIG}"
 
-set_env "AMMDS_SERVER_PORT" "${ammds_port}"     "${ENV_CONFIG}"
-set_env "ADMIN_USER"        "ammds"              "${ENV_CONFIG}"
-set_env "ADMIN_PASS"        "${ammds_password}"  "${ENV_CONFIG}"
-set_env "AMMDS_SYSTEM_MODE" "full"               "${ENV_CONFIG}"
+set_env_if_not_empty "AMMDS_SERVER_PORT" "${ammds_port}"     "${ENV_CONFIG}"
+set_env_if_not_empty "ADMIN_USER"        "ammds"              "${ENV_CONFIG}"
+set_env_if_not_empty "ADMIN_PASS"        "${ammds_password}"  "${ENV_CONFIG}"
+set_env_if_not_empty "AMMDS_SYSTEM_MODE" "full"               "${ENV_CONFIG}"
 
 log_message "环境变量写入完成"
 
