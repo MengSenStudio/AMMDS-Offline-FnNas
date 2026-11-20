@@ -1,0 +1,91 @@
+#!/bin/bash
+
+############################
+# 日志函数
+############################
+MAIN_LOG="/tmp/ammds/fnos.log"
+APP_LOG="/tmp/ammds/app.log"
+FNOAS_LOG="${TRIM_TEMP_LOGFILE}"
+
+log_message() {
+    local msg="$1"
+    local ts
+    ts=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "${ts} [AMMDS] ${msg}" | tee -a "${MAIN_LOG}"
+}
+
+mkdir -p /tmp/ammds
+
+log_message "==============安装开始=============="
+
+# 效验密码一致性
+if [ "${ammds_password}" != "${ammds_password_confirm}" ]; then
+    log_message "密码不一致"
+    echo "[AMMDS] 管理员密码不一致" | tee -a "${FNOAS_LOG}" >> "${FNOAS_LOG}" 2>&1
+    exit 1
+fi
+
+# 端口占用检测函数
+check_port() {
+    local port="$1"
+    ss -tlnp 2>/dev/null | grep -q ":${port} " && return 0
+    return 1
+}
+
+# 效验端口占用
+if check_port "${ammds_port}"; then
+    log_message "端口 ${ammds_port} 已被占用，安装失败"
+    echo "[AMMDS] 端口 ${ammds_port} 已被占用，请重新安装并更换端口后重试" | tee -a "${FNOAS_LOG}"
+    exit 1
+fi
+
+############################
+# 环境变量写入函数
+############################
+ENV_CONFIG="${TRIM_PKGETC}/ammds.env"
+
+set_env() {
+    local key="$1"
+    local value="$2"
+    local file="$3"
+
+    # 确保目录存在
+    mkdir -p "$(dirname "${file}")"
+
+    if [ -f "${file}" ] && grep -q "^${key}=" "${file}" 2>/dev/null; then
+        sed -i "s|^${key}=.*|${key}=${value}|" "${file}"
+    else
+        echo "${key}=${value}" >> "${file}"
+    fi
+}
+
+# 清空已有配置文件
+if [ -f "${ENV_CONFIG}" ]; then
+    log_message "检测到已有配置文件，已清空"
+    > "${ENV_CONFIG}"
+fi
+
+# 仅当值非空时才写入环境变量
+set_env_if_not_empty() {
+    local key="$1"
+    local value="$2"
+    local file="$3"
+
+    if [ -n "${value}" ]; then
+        set_env "${key}" "${value}" "${file}"
+    else
+        log_message "跳过空变量 ${key}"
+    fi
+}
+
+# 写入环境变量
+log_message "写入环境变量到 ${ENV_CONFIG}"
+
+set_env_if_not_empty "AMMDS_SERVER_PORT" "${ammds_port}"     "${ENV_CONFIG}"
+set_env_if_not_empty "ADMIN_USER"        "ammds"              "${ENV_CONFIG}"
+set_env_if_not_empty "ADMIN_PASS"        "${ammds_password}"  "${ENV_CONFIG}"
+set_env_if_not_empty "AMMDS_SYSTEM_MODE" "full"               "${ENV_CONFIG}"
+
+log_message "环境变量写入完成"
+
+exit 0

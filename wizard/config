@@ -1,0 +1,104 @@
+[
+    {
+        "stepTitle": "应用配置",
+        "items": [
+            {
+                "type": "select",
+                "field": "AMMDS_SCHEDULER_ENABLE",
+                "label": "是否启用定时任务",
+                "helpText": "是否启用定时任务，默认启用",
+                "initValue": "true",
+                "options": [
+                    {
+                        "label": "启用",
+                        "value": "true"
+                    },
+                    {
+                        "label": "禁用",
+                        "value": "false"
+                    }
+                ],
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请选择是否启用定时任务"
+                    }
+                ]
+            },
+            {
+                "type": "select",
+                "field": "AMMDS_MONITOR_ENABLE",
+                "label": "是否启用监控",
+                "helpText": "是否启用监控功能，默认启用",
+                "initValue": "true",
+                "options": [
+                    {
+                        "label": "启用",
+                        "value": "true"
+                    },
+                    {
+                        "label": "禁用",
+                        "value": "false"
+                    }
+                ],
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请选择是否启用监控"
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "field": "AMMDS_NETWORK_TIMEOUT",
+                "label": "网络超时时间",
+                "helpText": "网络请求超时时间（秒），默认 60 秒",
+                "initValue": "60",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请输入网络超时时间"
+                    },
+                    {
+                        "pattern": "^[1-9]\\d*$",
+                        "message": "请输入大于 0 的整数（单位：秒）"
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "field": "AMMDS_MAX_FILE_SIZE",
+                "label": "最大文件大小",
+                "helpText": "支持 B、KB、MB、GB、TB，例如：5GB",
+                "initValue": "5GB",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请输入最大文件大小"
+                    },
+                    {
+                        "pattern": "^[1-9]\\d*(B|KB|MB|GB|TB)$",
+                        "message": "格式错误，例如：5GB、512MB、1024KB"
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "field": "AMMDS_MAX_REQUEST_SIZE",
+                "label": "最大请求大小",
+                "helpText": "支持 B、KB、MB、GB、TB，例如：20GB",
+                "initValue": "20GB",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请输入最大请求大小"
+                    },
+                    {
+                        "pattern": "^[1-9]\\d*(B|KB|MB|GB|TB)$",
+                        "message": "格式错误，例如：20GB、1GB、512MB"
+                    }
+                ]
+            }
+        ]
+    }
+]
